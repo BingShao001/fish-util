@@ -1,7 +1,7 @@
 package com.yb.fish.utils;
 
-import com.yb.venus.log.LoggerFactory;
-import com.yb.venus.log.VenusLogger;
+import com.yb.fish.exception.OriginalAssert;
+import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.beans.BeanUtils;
 **/
 public class BeansConvert {
 
-    private static final VenusLogger log = LoggerFactory.getLogger(BeansConvert.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(OriginalAssert.class);
     /**
      * 实体对象复制
      * @param source 被复制对象
@@ -25,7 +25,7 @@ public class BeansConvert {
         if (source != null && target != null) {
             BeanUtils.copyProperties(source, target);
         }else {
-            log.error("source(被复制对象), target(目标对象) : 不为空！");
+            logger.error("source(被复制对象), target(目标对象) : 不为空！");
         }
         return target;
     }

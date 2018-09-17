@@ -1,82 +1,127 @@
 package com.yb.fish.delay;
 
+import com.alibaba.fastjson.JSON;
 import com.yb.fish.executor.AsynTaskExecutors;
-import com.yb.osp.core.exception.OspException;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class OffsetNetworkDelayQueue {
-    private static DelayQueue<Delayed> delayQueue = new DelayQueue<>();
+import static com.yb.fish.constant.FishContants.ZERO;
+
+
+@Service
+public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue {
+
+    private Map<String, Integer> counts = new ConcurrentHashMap<>();
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    Logger logger = org.slf4j.LoggerFactory.getLogger(InterfaceOffsetNetworkDelayQueue.class);
 
     /**
      * 制定delay rule
      *
-     * @param delayed
+     * @param jPoint
      */
-    private void addDelayQueue(Delayed delayed) {
-        delayQueue.add(delayed);
+    private void addDelayQueue(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint) {
+        Object[] params = jPoint.getArgs();
+        EventOffsetDelay offsetDelay = new EventOffsetDelay(System.currentTimeMillis() + EventOffsetDelay.DELAY_TIME, params);
+        delayQueue.add(offsetDelay);
     }
 
     /**
      * 处理delay任务
-     * @throws OspException
+     *
      */
-    private boolean consumeAction(Class clazz,String methodName) throws OspException {
+    private boolean consumeAction(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint) {
         Object returnData = null;
-        Object param = null;
+        String className = jPoint.getTarget().getClass().getName();
+        String methodName = jPoint.getSignature().getName();
+        String countKey = Thread.currentThread().getName()+className + methodName;
+        this.increaseCount(countKey);
         //this is blocker
         while (!delayQueue.isEmpty()) {
-            try {
-                EventOffsetDelay eventOffsetDelay = (EventOffsetDelay) delayQueue.take();
-                param = eventOffsetDelay.getDelayData();
-                returnData = executeMethodByName(clazz,methodName,param);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                offsetRpcTask(clazz,methodName);
+            if (this.getCount(countKey) > MAX) {
+                System.out.println(Thread.currentThread().getName()+" count : "+this.getCount(countKey));
+                this.syncOffsetData(jPoint);
+                try {
+                    delayQueue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                break;
             }
-
+            try {
+                EventOffsetDelay<Object[]> eventOffsetDelay = (EventOffsetDelay<Object[]>) delayQueue.take();
+                Object[] params = eventOffsetDelay.getDelayData();
+                returnData = jPoint.proceed(params);
+            } catch (Throwable throwable) {
+                backUp(jPoint);
+            }
         }
         return null == returnData ? false : true;
     }
 
-    /**
-     * executeMethodByName
-     * @param clazz
-     * @param methodName
-     * @param param
-     * @return
-     * @throws NoSuchMethodException
-     * @throws InvocationTargetException
-     * @throws IllegalAccessException
-     */
-    private Object executeMethodByName(Class clazz,String methodName,Object... param) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        Method method = clazz.getDeclaredMethod(methodName);
-        Object returnData = method.invoke(param);
-        return returnData;
+    private boolean backUp(ProceedingJoinPoint jPoint) {
+        DelayQueue<Delayed> delayQueue = new DelayQueue<>();
+        addDelayQueue(delayQueue,jPoint);
+        return consumeAction(delayQueue,jPoint);
     }
+
     /**
      * 补偿多线程延时调用
      *
      * @return
      * @throws Exception
      */
-    public void offsetRpcTask(Class interfaceClazz,String methodName,Object... param) throws OspException {
+    @Override
+    public void offsetTask(ProceedingJoinPoint jPoint) {
         ThreadPoolExecutor threadPoolExecutor = AsynTaskExecutors.getExecutors();
         threadPoolExecutor.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                EventOffsetDelay offsetDelay = new EventOffsetDelay(System.currentTimeMillis() + EventOffsetDelay.DELAY_TIME, param);
-                addDelayQueue(offsetDelay);
-                return consumeAction(interfaceClazz,methodName);
+                return backUp(jPoint);
             }
         });
-
         threadPoolExecutor.shutdown();
+    }
+
+    /**
+     * 持久化日志，注意事务外部配置
+     *
+     * @param jPoint
+     */
+    @Override
+    public void syncOffsetData(ProceedingJoinPoint jPoint) {
+        System.out.println(Thread.currentThread().getName());
+        try {
+            Class clazz = jPoint.getTarget().getClass();
+            String className = clazz.getName();
+            Object[] args = jPoint.getArgs();
+            String argsJson = JSON.toJSONString(args);
+            String realMethod = jPoint.getSignature().getName();
+            String sql = "INSERT INTO offset (`class_name`,`method_name`,`args`,`create_time`) VALUES(?, ?, ?,now())";
+            jdbcTemplate.update(sql, className, realMethod, argsJson);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private int getCount(String countKey) {
+        return counts.get(countKey) == null ? ZERO : counts.get(countKey);
+    }
+
+    private void increaseCount(String countKey) {
+        int count = getCount(countKey);
+        counts.put(countKey, ++count);
     }
 }

@@ -1,6 +1,5 @@
 package com.yb.fish.exception;
 
-import com.yb.osp.core.exception.OspException;
 
 /**
 * 标识业务异常
@@ -8,7 +7,7 @@ import com.yb.osp.core.exception.OspException;
 * @create 2018/5/23
 * @version 1.0
 **/
-public class BusinessException extends OspException {
+public class BusinessException extends Exception {
 
     private static final long serialVersionUID = 1L;
     /**
@@ -40,9 +39,6 @@ public class BusinessException extends OspException {
         this.errorCode = errorCode;
         this.message = message;
         this.bussinessErrorGroup = bussinessErrorGroup;
-        super.setReturnCode(Integer.toString(this.errorCode));
-        super.setReturnMessage(this.message);
-        super.setErrorGroup(this.bussinessErrorGroup);
     }
 
     /**
@@ -53,10 +49,6 @@ public class BusinessException extends OspException {
     public BusinessException(int errorCode, String message) {
         this.errorCode = errorCode;
         this.message = message;
-        super.setReturnCode(Integer.toString(this.errorCode));
-        super.setReturnMessage(this.message);
-        super.setErrorGroup(this.bussinessErrorGroup);
-
     }
 
     @Override

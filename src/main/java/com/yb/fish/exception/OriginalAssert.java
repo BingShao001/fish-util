@@ -2,8 +2,7 @@ package com.yb.fish.exception;
 
 import com.alibaba.fastjson.JSON;
 import com.yb.fish.constant.FishContants;
-import com.yb.osp.core.exception.OspException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -118,9 +117,8 @@ public class OriginalAssert extends Assert {
      */
     public static void throwBusinessException(String functionName, Exception e) throws BusinessException {
         logger.info(functionName + FishContants.LOG_SUFFIX, JSON.toJSON(e.getMessage()));
-        if (e instanceof OspException){
-            OspException ospException = (OspException) e;
-            throw new BusinessException(Integer.parseInt(ospException.getErrorGroup()), ospException.getMessage());
+        if (e instanceof BusinessException){
+            throw new BusinessException(((BusinessException) e).getErrorCode(),e.getMessage());
         }
         throw new BusinessException(ErrorMsg.SYSTEM_ERROR.getErrorCode(), ErrorMsg.SYSTEM_ERROR.getErrorMsg());
     }

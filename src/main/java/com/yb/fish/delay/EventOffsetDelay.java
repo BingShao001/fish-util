@@ -11,9 +11,9 @@ import java.util.concurrent.TimeUnit;
 * @create 2018/3/12
 * @version 1.0
 **/
-class EventOffsetDelay<T> implements Delayed {
+public class EventOffsetDelay<T> implements Delayed {
 
-	public static final int DELAY_TIME = 3000;
+	public static final int DELAY_TIME = 2000;
     public static final int PEEK = -1;
     public static final int EQUAL = 0;
     public static final int LAST =  1;
