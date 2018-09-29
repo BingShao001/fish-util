@@ -1,21 +1,17 @@
 package com.yb.fish.primarykey;
 
 import com.yb.fish.constant.FishContants;
-
-import java.util.Random;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * (单点)主键生成工具
+ *
  * @author bing
- * @create 2018/3/16
  * @version 1.0
+ * @create 2018/3/16
  **/
 public class SingleKeyGenerate {
-
-    private static Lock lock = new ReentrantLock();
 
     /***
      * 生成 UUID
@@ -38,18 +34,8 @@ public class SingleKeyGenerate {
     }
 
     private static long getRandomNum() {
-        Random random = new Random();
-        int randomNum = FishContants.ZERO;
-        try {
-            lock.lock();
-            randomNum = random.nextInt(FishContants.BOUND);
-            if (randomNum < FishContants.MIN_NUM) {
-                randomNum = randomNum + FishContants.MIN_NUM;
-            }
-        } finally {
-            lock.unlock();
-        }
-        return randomNum;
+        int randomNum = ThreadLocalRandom.current().nextInt() * FishContants.BOUND;
+        return randomNum < FishContants.MIN_NUM ? randomNum + FishContants.MIN_NUM : randomNum;
     }
 
 }
