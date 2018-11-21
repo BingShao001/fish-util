@@ -21,7 +21,7 @@ public class BigDecimlComputer {
     public static final char RIGHT_SIGN = ')';
 
     public static void main(String[] args) {
-        BigDecimal[] bigDecimals = {BigDecimal.valueOf(2), BigDecimal.valueOf(2), BigDecimal.valueOf(3), BigDecimal.valueOf(1)};
+        BigDecimal[] bigDecimals = {BigDecimal.valueOf(2.1), BigDecimal.valueOf(2), BigDecimal.valueOf(3), BigDecimal.valueOf(1)};
         String rex = "?*?/(?+?)";
         BigDecimal decimal = computerBigDecimalByExpression(rex, bigDecimals);
         System.out.println(decimal);

@@ -9,7 +9,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 * @version 1.0
 **/
 public interface InterfaceOffsetNetworkDelayQueue {
-     static final int MAX = 2;
-     void offsetTask(ProceedingJoinPoint jPoint);
-     void syncOffsetData(ProceedingJoinPoint jPoint);
+
+    void offsetTask(ProceedingJoinPoint jPoint, int tryMax);
+
+    void syncOffsetData(ProceedingJoinPoint jPoint);
 }

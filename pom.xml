@@ -13,19 +13,19 @@
         <java.version>1.8</java.version>
         <java.encoding>UTF-8</java.encoding>
         <java.doc>2.9.1</java.doc>
-        <osp.basic>2.7.2</osp.basic>
+        <!--<osp.basic>2.7.2</osp.basic>-->
         <spring.core>4.0.5.RELEASE</spring.core>
         <computer.fel>0.8</computer.fel>
         <spring.beans>5.0.2.RELEASE</spring.beans>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>com.yb.osp</groupId>
-            <artifactId>osp-basic</artifactId>
-            <version>${osp.basic}</version>
-            <scope>compile</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.yb.osp</groupId>-->
+            <!--<artifactId>osp-basic</artifactId>-->
+            <!--<version>${osp.basic}</version>-->
+            <!--<scope>compile</scope>-->
+        <!--</dependency>-->
 
         <dependency>
             <groupId>org.springframework</groupId>
@@ -77,37 +77,37 @@
         </dependency>
     </dependencies>
     <!--nexus start-->
-    <repositories>
-        <repository>
-            <id>ybShopMavenCentral</id>
-            <name>ybShopMavenCentral</name>
-            <url>http://mvn1.tools.ybshop.com/nexus/content/groups/public</url>
-        </repository>
-        <repository>
-            <id>ybShopMavenSnapshotRepository</id>
-            <name>ybShopMavenSnapshotRepository</name>
-            <url>http://mvn1.tools.ybshop.com/nexus/content/repositories/snapshots</url>
-        </repository>
-        <repository>
-            <id>ybShopMavenReleaseRepository</id>
-            <name>ybShopMavenReleaseRepository</name>
-            <url>http://mvn1.tools.ybshop.com/nexus/content/repositories/releases</url>
-        </repository>
-    </repositories>
+    <!--<repositories>-->
+        <!--<repository>-->
+            <!--<id>ybShopMavenCentral</id>-->
+            <!--<name>ybShopMavenCentral</name>-->
+            <!--<url>http://mvn1.tools.ybshop.com/nexus/content/groups/public</url>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>ybShopMavenSnapshotRepository</id>-->
+            <!--<name>ybShopMavenSnapshotRepository</name>-->
+            <!--<url>http://mvn1.tools.ybshop.com/nexus/content/repositories/snapshots</url>-->
+        <!--</repository>-->
+        <!--<repository>-->
+            <!--<id>ybShopMavenReleaseRepository</id>-->
+            <!--<name>ybShopMavenReleaseRepository</name>-->
+            <!--<url>http://mvn1.tools.ybshop.com/nexus/content/repositories/releases</url>-->
+        <!--</repository>-->
+    <!--</repositories>-->
 
     <!--deploy-->
-    <distributionManagement>
-        <repository>
-            <id>ybShopMavenReleaseRepository</id>
-            <name>ybShopMavenReleaseRepository</name>
-            <url>http://mvn1.tools.ybshop.com/nexus/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>ybShopMavenSnapshotRepository</id>
-            <name>ybShopMavenSnapshotRepository</name>
-            <url>http://mvn1.tools.ybshop.com/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <!--<distributionManagement>-->
+        <!--<repository>-->
+            <!--<id>ybShopMavenReleaseRepository</id>-->
+            <!--<name>ybShopMavenReleaseRepository</name>-->
+            <!--<url>http://mvn1.tools.ybshop.com/nexus/content/repositories/releases</url>-->
+        <!--</repository>-->
+        <!--<snapshotRepository>-->
+            <!--<id>ybShopMavenSnapshotRepository</id>-->
+            <!--<name>ybShopMavenSnapshotRepository</name>-->
+            <!--<url>http://mvn1.tools.ybshop.com/nexus/content/repositories/snapshots</url>-->
+        <!--</snapshotRepository>-->
+    <!--</distributionManagement>-->
     <!--nexus end-->
 
     <build>

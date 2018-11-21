@@ -5,3 +5,10 @@
   如它的名字一样，穿梭在不同的项目中供大家使用，无侵入，无感知。
   同时也欢迎对技术热爱的同学加入，一起提升，一起维护起来。
   
+<!--外部环境依赖配置--> 
+<context:component-scan base-package="com.yb.mp.fish.*" />
+<asgard:service name="OspCommonAuthSDK" />
+ 
+<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+   <property name="dataSource" ref="OspCommonAuthSDK"></property>
+</bean>

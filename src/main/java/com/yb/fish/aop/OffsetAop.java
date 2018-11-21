@@ -54,8 +54,9 @@ public class OffsetAop {
                     ret = jPoint.proceed();
                 } catch (Exception e) {
                     //执行补偿处理
+                    Offset offset = method.getAnnotation(Offset.class);
                     logger.warn("offset : service:{},method:{}", targetClassName, currentMethod);
-                    offsetNetworkDelayQueue.offsetTask(jPoint);
+                    offsetNetworkDelayQueue.offsetTask(jPoint,offset.value());
                 }
                 return ret;
             }

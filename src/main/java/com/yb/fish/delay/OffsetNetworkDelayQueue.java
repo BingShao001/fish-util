@@ -41,7 +41,7 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
      * 处理delay任务
      *
      */
-    private boolean consumeAction(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint) {
+    private boolean consumeAction(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint,int tryMax) {
         Object returnData = null;
         String className = jPoint.getTarget().getClass().getName();
         String methodName = jPoint.getSignature().getName();
@@ -49,7 +49,7 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
         this.increaseCount(countKey);
         //this is blocker
         while (!delayQueue.isEmpty()) {
-            if (this.getCount(countKey) > MAX) {
+            if (this.getCount(countKey) > tryMax) {
                 System.out.println(Thread.currentThread().getName()+" count : "+this.getCount(countKey));
                 this.syncOffsetData(jPoint);
                 try {
@@ -64,16 +64,16 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
                 Object[] params = eventOffsetDelay.getDelayData();
                 returnData = jPoint.proceed(params);
             } catch (Throwable throwable) {
-                backUp(jPoint);
+                backUp(jPoint,tryMax);
             }
         }
         return null == returnData ? false : true;
     }
 
-    private boolean backUp(ProceedingJoinPoint jPoint) {
+    private boolean backUp(ProceedingJoinPoint jPoint,int tryMax) {
         DelayQueue<Delayed> delayQueue = new DelayQueue<>();
         addDelayQueue(delayQueue,jPoint);
-        return consumeAction(delayQueue,jPoint);
+        return consumeAction(delayQueue,jPoint,tryMax);
     }
 
     /**
@@ -83,12 +83,12 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
      * @throws Exception
      */
     @Override
-    public void offsetTask(ProceedingJoinPoint jPoint) {
+    public void offsetTask(ProceedingJoinPoint jPoint,int tryMax) {
         ThreadPoolExecutor threadPoolExecutor = AsynTaskExecutors.getExecutors();
         threadPoolExecutor.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                return backUp(jPoint);
+                return backUp(jPoint,tryMax);
             }
         });
         threadPoolExecutor.shutdown();
