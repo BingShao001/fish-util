@@ -1,42 +1,61 @@
 package com.yb.fish.compute;
 
+import com.alibaba.fastjson.JSONObject;
 import com.yb.fish.constant.FishContants;
 
 import java.math.BigDecimal;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Stack;
+
 /**
-* 精度运算模板工具
-* @author bing
-* @create 2018/5/23
-* @version 1.0
-**/
+ * 精度运算模板工具
+ *
+ * @author bing
+ * @version 1.0
+ * @create 2018/5/23
+ **/
 public class BigDecimlComputer {
-    public static final char DIVIDE = '/';
-    private static final char MULTIPLY = '*';
-    public static final char PLUS = '+';
-    public static final char SUBTRACT = '-';
-    public static final char LEFT_SIGN = '(';
-    public static final char RIGHT_SIGN = ')';
+    private final char DIVIDE = '/';
+    private final char MULTIPLY = '*';
+    private final char PLUS = '+';
+    private final char SUBTRACT = '-';
+    private final char LEFT_SIGN = '(';
+    private final char RIGHT_SIGN = ')';
+    //精度位数
+    private int diveScale;
+    //舍入方式
+    private int roundingMode;
+
+    /**
+     * 初始化工具对象
+     *
+     * @param diveScale    保留位数,eg:2
+     * @param roundingMode BigDecimal自带的舍入方式,eg:BigDecimal.ROUND_DOWN
+     */
+    public BigDecimlComputer(int diveScale, int roundingMode) {
+        this.diveScale = diveScale;
+        this.roundingMode = roundingMode;
+    }
 
     public static void main(String[] args) {
-        BigDecimal[] bigDecimals = {BigDecimal.valueOf(2.1), BigDecimal.valueOf(2), BigDecimal.valueOf(3), BigDecimal.valueOf(1)};
-        String rex = "?*?/(?+?)";
-        BigDecimal decimal = computerBigDecimalByExpression(rex, bigDecimals);
+        BigDecimal[] bigDecimals = {BigDecimal.valueOf(3), BigDecimal.valueOf(4), BigDecimal.valueOf(2),BigDecimal.valueOf(1), BigDecimal.valueOf(3), BigDecimal.valueOf(5)};
+        String rex = "?*(?+?-?)/?*?";
+        BigDecimlComputer decimlComputer = new BigDecimlComputer(2, BigDecimal.ROUND_DOWN);
+        BigDecimal decimal = decimlComputer.computerBigDecimalByExpression(rex, bigDecimals);
         System.out.println(decimal);
     }
 
     /**
      * 根据入参计算结果集
      *
-     * @param expression 表达式：?*?/(?+?)
-     * @param bigDecimals 占位符赋值
+     * @param expression  表达式：?*?/(?+?)
+     * @param bigDecimals 占位符赋值 BigDecimal[]
      * @return BigDecimal
      */
-    public static BigDecimal computerBigDecimalByExpression(String expression, BigDecimal... bigDecimals) {
-        Queue expressionQueue = buildExpressionQueue(expression, bigDecimals);
-        BigDecimal decimal = postfix(expressionQueue);
+    public BigDecimal computerBigDecimalByExpression(String expression, BigDecimal... bigDecimals) {
+        Queue expressionQueue = this.buildExpressionQueue(expression, bigDecimals);
+        BigDecimal decimal = this.postfix(expressionQueue);
         return decimal;
     }
 
@@ -47,7 +66,7 @@ public class BigDecimlComputer {
      * @param bigDecimals
      * @return
      */
-    private static Queue buildExpressionQueue(String expression, BigDecimal... bigDecimals) {
+    private Queue buildExpressionQueue(String expression, BigDecimal... bigDecimals) {
         char[] chars = expression.toCharArray();
         Queue expressionQueue = new ArrayDeque();
         int index = FishContants.ZERO;
@@ -86,13 +105,16 @@ public class BigDecimlComputer {
      * @param expressionQueue
      * @return
      */
-    private static BigDecimal postfix(Queue expressionQueue) {
-        Stack<BigDecimal> nums = new Stack<>(); // 保存数字
-        Stack<Character> opes = new Stack<>(); // 保存操作符
+    private BigDecimal postfix(Queue expressionQueue) {
+        // 保存数字栈
+        Stack<BigDecimal> nums = new Stack<>();
+        // 保存操作符栈
+        Stack<Character> opes = new Stack<>();
         while (!expressionQueue.isEmpty()) {
             Object data = expressionQueue.poll();
             BigDecimal dataDecimal = null;
             char dataOperators = FishContants.ZERO;
+            //数字进数字栈
             if (data instanceof BigDecimal) {
                 dataDecimal = (BigDecimal) data;
                 nums.push(dataDecimal);
@@ -101,27 +123,29 @@ public class BigDecimlComputer {
             if (data instanceof Character) {
                 dataOperators = (Character) data;
             }
-            //括号
+            //括号'('为开始
             if (dataOperators == LEFT_SIGN) {
                 opes.push(dataOperators);
                 continue;
             } else if (dataOperators == RIGHT_SIGN) {
                 while (opes.peek() != LEFT_SIGN) { // 括号里面运算完
-                    BigDecimal ret = computerData(nums.pop(), nums.pop(), opes.pop());
+                    System.out.println(JSONObject.toJSONString(nums));
+                    System.out.println();
+                    BigDecimal ret = this.computerData(nums.pop(), nums.pop(), opes.pop());
                     nums.push(ret);
                     continue;
                 }
                 opes.pop();
                 //运算
-            } else if (isLevelType(dataOperators) > FishContants.ZERO) {
+            } else if (this.isLevelType(dataOperators) > FishContants.ZERO) {
                 // 栈为空直接入栈
                 if (opes.isEmpty()) {
                     opes.push(dataOperators);
                     continue;
                 } else {
                     // 若栈顶元素优先级大于或等于要入栈的元素,将栈顶元素弹出并计算,然后入栈
-                    if (isLevelType(opes.peek()) >= isLevelType(dataOperators)) {
-                        BigDecimal ret = computerData(nums.pop(), nums.pop(), opes.pop());
+                    if (this.isLevelType(opes.peek()) >= this.isLevelType(dataOperators)) {
+                        BigDecimal ret = this.computerData(nums.pop(), nums.pop(), opes.pop());
                         nums.push(ret);
                     }
                     opes.push(dataOperators);
@@ -130,9 +154,10 @@ public class BigDecimlComputer {
         }
         // 最后一个字符若是数字,未入栈
         while (!opes.isEmpty()) {
-            BigDecimal ret = computerData(nums.pop(), nums.pop(), opes.pop());
+            BigDecimal ret = this.computerData(nums.pop(), nums.pop(), opes.pop());
             nums.push(ret);
         }
+
         return nums.pop();
     }
 
@@ -142,7 +167,7 @@ public class BigDecimlComputer {
      * @param operators
      * @return
      */
-    private static int isLevelType(char operators) {
+    private int isLevelType(char operators) {
         if (operators == PLUS || operators == SUBTRACT) {
             return 1;
         } else if (operators == MULTIPLY || operators == DIVIDE) {
@@ -160,16 +185,18 @@ public class BigDecimlComputer {
      * @param operators
      * @return
      */
-    private static BigDecimal computerData(BigDecimal prevData, BigDecimal nextData, char operators) {
+    private BigDecimal computerData(BigDecimal prevData, BigDecimal nextData, char operators) {
         BigDecimal sum = null;
         if (operators == PLUS) {
             sum = prevData.add(nextData);
         } else if (operators == SUBTRACT) {
-            sum = prevData.subtract(nextData);
+            //先入的栈为被减数。
+            sum = nextData.subtract(prevData);
         } else if (operators == MULTIPLY) {
             sum = prevData.multiply(nextData);
         } else if (operators == DIVIDE) {
-            sum = prevData.divide(nextData);
+            //先入的栈为被除数。
+            sum = nextData.divide(prevData, diveScale, roundingMode);
         }
         return sum;
     }
