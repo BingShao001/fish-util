@@ -8,6 +8,7 @@ package com.yb.fish.constant;
 public class FishContants {
     public static final int MIN_NUM = 10000;
     public static final int BOUND = 99999;
+    public static final int FOUR = 4;
     public static final int ZERO = 0;
     public static final String BUSINESS_EXCEPTION = "BusinessException";
     public static final int FILE_ERROR = 500;

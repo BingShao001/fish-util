@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.yb.mp</groupId>
-    <artifactId>common-mp-fish-utils</artifactId>
+    <artifactId>common-yb-fish-utils</artifactId>
     <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 

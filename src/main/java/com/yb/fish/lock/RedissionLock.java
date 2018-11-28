@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-@Service("redissionLock")
+@Service
 @DependsOn("springContextUtil")
 public class RedissionLock implements InterfaceRedisLock {
     Redisson redisson = null;
