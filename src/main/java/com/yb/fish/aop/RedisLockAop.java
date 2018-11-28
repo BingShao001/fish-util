@@ -1,5 +1,6 @@
 package com.yb.fish.aop;
 
+import com.yb.fish.annotation.LockKey;
 import com.yb.fish.annotation.RedisLock;
 import com.yb.fish.constant.FishContants;
 import com.yb.fish.lock.InterfaceRedisLock;
