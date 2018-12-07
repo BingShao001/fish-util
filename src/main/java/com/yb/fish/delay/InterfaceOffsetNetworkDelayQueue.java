@@ -10,7 +10,6 @@ import org.aspectj.lang.ProceedingJoinPoint;
 **/
 public interface InterfaceOffsetNetworkDelayQueue {
 
-    void offsetTask(ProceedingJoinPoint jPoint, int tryMax);
-
-    void syncOffsetData(ProceedingJoinPoint jPoint);
+    void offsetTask(ProceedingJoinPoint jPoint,int tryNum,String taskSql);
+    void syncOffsetData(ProceedingJoinPoint jPoint,String taskSql);
 }

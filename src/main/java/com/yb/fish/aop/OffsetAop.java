@@ -36,6 +36,7 @@ public class OffsetAop {
     }
 
     /***
+     * remark: @Offset(value = 2,taskSql = "INSERT INTO `task_scheduling` (`type`, `data`, `try_count`, `create_time`) VALUES(\"store_admin_change\",?,2,now())")
      * 切面处理日志功能
      * @param jPoint
      * @return
@@ -56,8 +57,8 @@ public class OffsetAop {
                     //执行补偿处理
                     Offset offset = method.getAnnotation(Offset.class);
                     logger.warn("offset : service:{},method:{}", targetClassName, currentMethod);
-                    offsetNetworkDelayQueue.offsetTask(jPoint,offset.value());
-                }
+                    offsetNetworkDelayQueue.offsetTask(jPoint,offset.value(),offset.taskSql());
+                    e.printStackTrace();                }
                 return ret;
             }
         }

@@ -1,7 +1,9 @@
 package com.yb.fish.delay;
 
 import com.alibaba.fastjson.JSON;
+import com.yb.fish.constant.FishContants;
 import com.yb.fish.executor.AsynTaskExecutors;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import static com.yb.fish.constant.FishContants.ZERO;
 @Service
 public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue {
 
+
     private Map<String, Integer> counts = new ConcurrentHashMap<>();
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -39,9 +42,8 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
 
     /**
      * 处理delay任务
-     *
      */
-    private boolean consumeAction(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint,int tryMax) {
+    private boolean consumeAction(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint,int tryNum,String taskSql) {
         Object returnData = null;
         String className = jPoint.getTarget().getClass().getName();
         String methodName = jPoint.getSignature().getName();
@@ -49,9 +51,8 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
         this.increaseCount(countKey);
         //this is blocker
         while (!delayQueue.isEmpty()) {
-            if (this.getCount(countKey) > tryMax) {
-                System.out.println(Thread.currentThread().getName()+" count : "+this.getCount(countKey));
-                this.syncOffsetData(jPoint);
+            if (this.getCount(countKey) > tryNum) {
+                this.syncOffsetData(jPoint,taskSql);
                 try {
                     delayQueue.take();
                 } catch (InterruptedException e) {
@@ -64,16 +65,16 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
                 Object[] params = eventOffsetDelay.getDelayData();
                 returnData = jPoint.proceed(params);
             } catch (Throwable throwable) {
-                backUp(jPoint,tryMax);
+                backUp(jPoint,tryNum,taskSql);
             }
         }
         return null == returnData ? false : true;
     }
 
-    private boolean backUp(ProceedingJoinPoint jPoint,int tryMax) {
+    private boolean backUp(ProceedingJoinPoint jPoint,int tryNum,String taskSql) {
         DelayQueue<Delayed> delayQueue = new DelayQueue<>();
         addDelayQueue(delayQueue,jPoint);
-        return consumeAction(delayQueue,jPoint,tryMax);
+        return consumeAction(delayQueue,jPoint,tryNum,taskSql);
     }
 
     /**
@@ -83,12 +84,12 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
      * @throws Exception
      */
     @Override
-    public void offsetTask(ProceedingJoinPoint jPoint,int tryMax) {
+    public void offsetTask(ProceedingJoinPoint jPoint,int tryNum,String taskSql) {
         ThreadPoolExecutor threadPoolExecutor = AsynTaskExecutors.getExecutors();
         threadPoolExecutor.submit(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
-                return backUp(jPoint,tryMax);
+                return backUp(jPoint,tryNum,taskSql);
             }
         });
         threadPoolExecutor.shutdown();
@@ -100,16 +101,19 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
      * @param jPoint
      */
     @Override
-    public void syncOffsetData(ProceedingJoinPoint jPoint) {
-        System.out.println(Thread.currentThread().getName());
+    public void syncOffsetData(ProceedingJoinPoint jPoint,String taskSql) {
+        Class clazz = jPoint.getTarget().getClass();
+        String className = clazz.getName();
+        String realMethod = jPoint.getSignature().getName();
+        if (StringUtils.isBlank(taskSql)){
+            logger.warn("syncOffsetData : service：{}",className+"."+realMethod);
+            return;
+        }
         try {
-            Class clazz = jPoint.getTarget().getClass();
-            String className = clazz.getName();
             Object[] args = jPoint.getArgs();
-            String argsJson = JSON.toJSONString(args);
-            String realMethod = jPoint.getSignature().getName();
-            String sql = "INSERT INTO offset (`class_name`,`method_name`,`args`,`create_time`) VALUES(?, ?, ?,now())";
-            jdbcTemplate.update(sql, className, realMethod, argsJson);
+            String argsJson = JSON.toJSONString(args[FishContants.ZERO]);
+            System.out.println(taskSql);
+            jdbcTemplate.update(taskSql, argsJson);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 @Documented
 public @interface Offset {
     int value() default 2;
+    String taskSql()default "";
 }
