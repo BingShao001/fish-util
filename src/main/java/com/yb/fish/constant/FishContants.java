@@ -18,4 +18,6 @@ public class FishContants {
     public static final String OSP_MSG_PROPERTIES = "ospMsg.properties";
     public static final String ASYNC_THREAD_POOL = "asyncThreadPool.properties";
     public static final long ACTIVE_TIME_OUT = 24*60*60*1000;
+    public static final String COUNT = "COUNT";
+    public static final String TIME = "TIME";
 }

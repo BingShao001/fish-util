@@ -23,8 +23,7 @@ import static com.yb.fish.constant.FishContants.ZERO;
 @Service
 public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue {
 
-
-    private Map<String, Integer> counts = new ConcurrentHashMap<>();
+    private Map<String, Integer> contains = new ConcurrentHashMap<>();
     @Autowired
     private JdbcTemplate jdbcTemplate;
     Logger logger = org.slf4j.LoggerFactory.getLogger(InterfaceOffsetNetworkDelayQueue.class);
@@ -36,21 +35,28 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
      */
     private void addDelayQueue(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint) {
         Object[] params = jPoint.getArgs();
-        EventOffsetDelay offsetDelay = new EventOffsetDelay(System.currentTimeMillis() + EventOffsetDelay.DELAY_TIME, params);
+        String className = jPoint.getTarget().getClass().getName();
+        String methodName = jPoint.getSignature().getName();
+        int currentTime = contains.get(Thread.currentThread().getName()+className + methodName+FishContants.TIME);
+        int delayTime = currentTime == ZERO ? EventOffsetDelay.DELAY_TIME : currentTime;
+        EventOffsetDelay offsetDelay = new EventOffsetDelay(System.currentTimeMillis() + delayTime, params);
         delayQueue.add(offsetDelay);
     }
 
     /**
      * 处理delay任务
+     *
      */
     private boolean consumeAction(DelayQueue<Delayed> delayQueue,ProceedingJoinPoint jPoint,int tryNum,String taskSql) {
         Object returnData = null;
         String className = jPoint.getTarget().getClass().getName();
         String methodName = jPoint.getSignature().getName();
-        String countKey = Thread.currentThread().getName()+className + methodName;
+        String currentName = Thread.currentThread().getName()+className + methodName;
+        String countKey = currentName+FishContants.COUNT;
         this.increaseCount(countKey);
         //this is blocker
         while (!delayQueue.isEmpty()) {
+            int currentCount = this.getCount(countKey);
             if (this.getCount(countKey) > tryNum) {
                 this.syncOffsetData(jPoint,taskSql);
                 try {
@@ -64,6 +70,7 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
                 EventOffsetDelay<Object[]> eventOffsetDelay = (EventOffsetDelay<Object[]>) delayQueue.take();
                 Object[] params = eventOffsetDelay.getDelayData();
                 returnData = jPoint.proceed(params);
+                contains.put(currentName+FishContants.TIME,currentCount*EventOffsetDelay.DELAY_TIME);
             } catch (Throwable throwable) {
                 backUp(jPoint,tryNum,taskSql);
             }
@@ -121,11 +128,11 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
     }
 
     private int getCount(String countKey) {
-        return counts.get(countKey) == null ? ZERO : counts.get(countKey);
+        return contains.get(countKey) == null ? ZERO : contains.get(countKey);
     }
 
     private void increaseCount(String countKey) {
         int count = getCount(countKey);
-        counts.put(countKey, ++count);
+        contains.put(countKey, ++count);
     }
 }
