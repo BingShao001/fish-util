@@ -1,9 +1,12 @@
 package com.yb.fish.aop;
 
+import com.alibaba.fastjson.JSON;
 import com.yb.fish.annotation.LockKey;
 import com.yb.fish.annotation.RedisLock;
 import com.yb.fish.constant.FishContants;
+import com.yb.fish.exception.OriginalAssert;
 import com.yb.fish.lock.InterfaceRedisLock;
+import com.yb.fish.utils.ReflectUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -12,6 +15,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
@@ -62,6 +66,7 @@ public class RedisLockAop {
                 } finally {
                     interfaceRedisLock.unLock(realLockKey);
                 }
+                OriginalAssert.isRealTrueThrows(null == ret, FishContants.REQ_ERROR, "该接口请求超时");
                 return ret;
             }
         }
@@ -90,19 +95,28 @@ public class RedisLockAop {
             Parameter parameter = typeAndValue.getKey();
             Object arg = typeAndValue.getValue();
             if (parameter.isAnnotationPresent(LockKey.class)) {
-                if (arg instanceof java.lang.Integer ||
-                        arg instanceof java.lang.Byte ||
-                        arg instanceof java.lang.Long ||
-                        arg instanceof java.lang.Double ||
-                        arg instanceof java.lang.Float ||
-                        arg instanceof java.lang.Character ||
-                        arg instanceof java.lang.Short ||
-                        arg instanceof java.lang.Boolean) {
+                if (ReflectUtils.isBasicType(arg)) {
                     return bussinessKey + String.valueOf(arg);
                 } else if (arg instanceof String) {
                     return bussinessKey + arg;
                 } else {
-                    new RuntimeException("指定的参数key只能为：8大基础类型和String类型");
+                    Class clazz = arg.getClass();
+                    Field[] fields = clazz.getDeclaredFields();
+                    for (Field field : fields){
+                        if (field.isAnnotationPresent(LockKey.class)){
+                            field.setAccessible(true);
+                            if (ReflectUtils.isBasicType(field.getType().getName())){
+                                Object fieldValue = ReflectUtils.getValueByFieldName(field.getName(),arg);
+                                return bussinessKey + String.valueOf(fieldValue);
+                            }else {
+                                Object fieldValue = ReflectUtils.getValueByFieldName(field.getName(),arg);
+                                return bussinessKey + JSON.toJSONString(fieldValue);
+                            }
+                        }else {
+                            new RuntimeException("对象属性需要@LockKey修饰");
+                        }
+                    }
+
                 }
             }
         }

@@ -12,6 +12,7 @@ public class FishContants {
     public static final int ZERO = 0;
     public static final String BUSINESS_EXCEPTION = "BusinessException";
     public static final int FILE_ERROR = 500;
+    public static final int REQ_ERROR = 405;
     public static final String FILE_ERROR_MSG = "请检查ospMsg.properties上的key是否对齐";
     public static final String LOG_SUFFIX = " Exception:{}";
     public static final String UTF_8 = "utf-8";
