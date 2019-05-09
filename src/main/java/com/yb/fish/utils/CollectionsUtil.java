@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 
 /**
@@ -58,5 +60,34 @@ public class CollectionsUtil {
         cs[0] -= 32;
         return String.valueOf(cs);
 
+    }
+    /**
+     * 只添加不为null的元素
+     * @param list
+     * @param t
+     * @return
+     */
+    public static <T> List<T> addListNotNull(List<T> list, T t){
+        if (null == list){
+            return new ArrayList<>();
+        }
+        if (null != t){
+            list.add(t);
+        }
+        return list;
+    }
+
+    /**
+     * 按条件筛选出List集合
+     * @param predicate
+     * @param list
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> generateListBycondition(Predicate<T> predicate, List<T> list){
+        if (null == list){
+            return new ArrayList<>();
+        }
+        return list.stream().filter(predicate).collect(Collectors.toList());
     }
 }
