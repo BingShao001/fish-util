@@ -122,6 +122,8 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>asyncThreadPool.properties</include>
+                    <!--spi support-->
+                    <include>META-INF/services/*</include>
                 </includes>
                 <excludes>
                     <exclude>ospMsg.properties</exclude>
