@@ -7,7 +7,7 @@ package com.yb.fish.exception;
 * @create 2018/5/23
 * @version 1.0
 **/
-public class BusinessException extends Exception {
+public class BusinessException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
     /**

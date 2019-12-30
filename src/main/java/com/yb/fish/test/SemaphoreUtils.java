@@ -10,10 +10,8 @@ import java.util.concurrent.Semaphore;
  * @date 2019/12/9上午10:30
  */
 public class SemaphoreUtils {
-    private Semaphore semaphore = null;
 
-    private SemaphoreUtils() {
-    }
+    private SemaphoreUtils() {}
 
     public static Semaphore getSemaphoreInstance(int permits) {
         return new Semaphore(permits);
