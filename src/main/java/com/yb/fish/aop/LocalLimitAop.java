@@ -4,14 +4,12 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.yb.fish.annotation.LocalLimit;
 import com.yb.fish.constant.FishContants;
 import com.yb.fish.exception.OriginalAssert;
-import com.yb.fish.lock.InterfaceRedisLock;
 import com.yb.fish.test.SemaphoreUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -30,8 +28,6 @@ import java.util.concurrent.Semaphore;
 public class LocalLimitAop {
     Logger logger = org.slf4j.LoggerFactory.getLogger(LocalLimitAop.class);
     private final static String EXECUTION = "@annotation(com.yb.fish.annotation.LocalLimit)";
-    @Autowired
-    InterfaceRedisLock interfaceRedisLock;
 
     /**
      * 切入点可以添加其他路径
@@ -63,7 +59,7 @@ public class LocalLimitAop {
         Semaphore semaphore = SemaphoreUtils.getSemaphoreInstance(qps);
         limiter.acquire();
         try {
-            semaphore.acquire(qps);
+            semaphore.acquire();
             jPoint.proceed();
         } catch (Throwable throwable) {
             String targetClassName = targeClazz.getName();
