@@ -1,6 +1,7 @@
 package com.yb.fish.delay;
 
 import com.alibaba.fastjson.JSON;
+import com.yb.fish.appcontext.SpringContextUtil;
 import com.yb.fish.constant.FishContants;
 import com.yb.fish.executor.AsynTaskExecutors;
 import org.apache.commons.lang3.StringUtils;
@@ -24,8 +25,6 @@ import static com.yb.fish.constant.FishContants.ZERO;
 public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue {
 
     private Map<String, Integer> contains = new ConcurrentHashMap<>();
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
     Logger logger = org.slf4j.LoggerFactory.getLogger(InterfaceOffsetNetworkDelayQueue.class);
 
     /**
@@ -120,6 +119,7 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
             Object[] args = jPoint.getArgs();
             String argsJson = JSON.toJSONString(args[FishContants.ZERO]);
             System.out.println(taskSql);
+            JdbcTemplate jdbcTemplate = SpringContextUtil.getBean(JdbcTemplate.class);
             jdbcTemplate.update(taskSql, argsJson);
         } catch (Exception e) {
             e.printStackTrace();
