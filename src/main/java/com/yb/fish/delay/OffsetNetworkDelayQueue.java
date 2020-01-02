@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,8 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
 
     private Map<String, Integer> contains = new ConcurrentHashMap<>();
     Logger logger = org.slf4j.LoggerFactory.getLogger(InterfaceOffsetNetworkDelayQueue.class);
-
+    @Resource
+    SpringContextUtil springContextUtil;
     /**
      * 制定delay rule
      *
@@ -119,7 +121,7 @@ public class OffsetNetworkDelayQueue implements InterfaceOffsetNetworkDelayQueue
             Object[] args = jPoint.getArgs();
             String argsJson = JSON.toJSONString(args[FishContants.ZERO]);
             System.out.println(taskSql);
-            JdbcTemplate jdbcTemplate = SpringContextUtil.getBean(JdbcTemplate.class);
+            JdbcTemplate jdbcTemplate = springContextUtil.getBean(JdbcTemplate.class);
             jdbcTemplate.update(taskSql, argsJson);
         } catch (Exception e) {
             e.printStackTrace();

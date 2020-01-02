@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.RateLimiter;
 import com.yb.fish.annotation.LocalLimit;
 import com.yb.fish.constant.FishContants;
 import com.yb.fish.exception.OriginalAssert;
-import com.yb.fish.test.SemaphoreUtils;
+import com.yb.fish.init.LocalLimitConfigContainer;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -26,8 +26,9 @@ import java.util.concurrent.Semaphore;
 @Component
 @Aspect
 public class LocalLimitAop {
+
     Logger logger = org.slf4j.LoggerFactory.getLogger(LocalLimitAop.class);
-    private final static String EXECUTION = "@annotation(com.yb.fish.annotation.LocalLimit)";
+    private final static String EXECUTION = "execution(* com.*..*.*(..))";
 
     /**
      * 切入点可以添加其他路径
@@ -42,31 +43,31 @@ public class LocalLimitAop {
 
         String currentMethod = jPoint.getSignature().getName();
         Object ret = null;
+        boolean hasLocalLimit = targeClazz.isAnnotationPresent(LocalLimit.class);
         for (Method method : targeClazz.getDeclaredMethods()) {
-            boolean isLocalLimit = currentMethod.equals(method.getName()) && method.isAnnotationPresent(LocalLimit.class);
-            if (isLocalLimit) {
-                this.executeLimit(jPoint, method,targeClazz);
+            boolean isCurrent = currentMethod.equals(method.getName());
+            if (hasLocalLimit && isCurrent) {
+                this.executeLimit(jPoint,targeClazz);
                 return ret;
             }
         }
         return ret;
     }
 
-    private void executeLimit(ProceedingJoinPoint jPoint,Method method,Class targeClazz){
-        LocalLimit localLimit = method.getAnnotation(LocalLimit.class);
-        int qps = localLimit.qps();
-        RateLimiter limiter = RateLimiter.create(qps);
-        Semaphore semaphore = SemaphoreUtils.getSemaphoreInstance(qps);
+    private void executeLimit(ProceedingJoinPoint jPoint, Class targeClazz) {
+
+        String className = targeClazz.getName();
+        RateLimiter limiter = LocalLimitConfigContainer.getRateLimiter(className);
+        Semaphore semaphore = LocalLimitConfigContainer.getSemaphore(className);
         limiter.acquire();
         try {
             semaphore.acquire();
             jPoint.proceed();
         } catch (Throwable throwable) {
-            String targetClassName = targeClazz.getName();
-            logger.info("local_limit_error:class_name:{},ex:{}", targetClassName, throwable.getMessage());
+            logger.info("local_limit_error:class_name:{},ex:{}", className, throwable.getMessage());
             semaphore.release();
             OriginalAssert.isRealTrueThrows(true, FishContants.REQ_ERROR, "该接口请求超时");
-        }finally {
+        } finally {
             semaphore.release();
         }
     }
