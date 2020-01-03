@@ -8,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -29,12 +30,33 @@ public class LocalLimitConfig implements InitializingBean, ApplicationContextAwa
             Class<?> beanType = applicationContext.getType(beanName);
             boolean hasLocalLimit = beanType.isAnnotationPresent(LocalLimit.class);
             if (hasLocalLimit) {
+                this.serviceLocalLimit(beanType);
+            } else {
+                this.methodLocalLimit(beanType);
+            }
+        }
+    }
+
+    private void serviceLocalLimit(Class<?> beanType){
+        String className = beanType.getName();
+        LocalLimit localLimit = beanType.getAnnotation(LocalLimit.class);
+        RateLimiter rateLimiter = RateLimiter.create(localLimit.qps());
+        LocalLimitConfigContainer.setRateLimiter(className, rateLimiter);
+        Semaphore semaphore = new Semaphore(localLimit.qps());
+        LocalLimitConfigContainer.setSemaphore(className, semaphore);
+    }
+
+    private void methodLocalLimit(Class<?> beanType){
+        Method[] methods = beanType.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.isAnnotationPresent(LocalLimit.class)){
                 String className = beanType.getName();
-                LocalLimit localLimit = beanType.getAnnotation(LocalLimit.class);
+                String methodName = method.getName();
+                LocalLimit localLimit =  method.getAnnotation(LocalLimit.class);
                 RateLimiter rateLimiter = RateLimiter.create(localLimit.qps());
-                LocalLimitConfigContainer.setRateLimiter(className, rateLimiter);
+                LocalLimitConfigContainer.setRateLimiter(className+methodName, rateLimiter);
                 Semaphore semaphore = new Semaphore(localLimit.qps());
-                LocalLimitConfigContainer.setSemaphore(className, semaphore);
+                LocalLimitConfigContainer.setSemaphore(className+methodName, semaphore);
             }
         }
     }

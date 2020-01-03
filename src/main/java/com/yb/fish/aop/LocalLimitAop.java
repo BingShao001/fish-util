@@ -27,42 +27,43 @@ import java.util.concurrent.Semaphore;
 @Aspect
 public class LocalLimitAop {
 
-    Logger logger = org.slf4j.LoggerFactory.getLogger(LocalLimitAop.class);
     private final static String EXECUTION = "execution(* com.*..*.*(..))";
 
-    /**
-     * 切入点可以添加其他路径
-     */
-    @Pointcut(EXECUTION)
-    private void pointCutMethod() {
-    }
+    Logger logger = org.slf4j.LoggerFactory.getLogger(LocalLimitAop.class);
 
     @Around("pointCutMethod()")
     public Object aroundLog(ProceedingJoinPoint jPoint) throws Throwable {
-        Class targeClazz = jPoint.getTarget().getClass();
 
+        Class targeClazz = jPoint.getTarget().getClass();
         String currentMethod = jPoint.getSignature().getName();
-        Object ret = null;
-        boolean hasLocalLimit = targeClazz.isAnnotationPresent(LocalLimit.class);
         for (Method method : targeClazz.getDeclaredMethods()) {
-            boolean isCurrent = currentMethod.equals(method.getName());
-            if (hasLocalLimit && isCurrent) {
-                this.executeLimit(jPoint,targeClazz);
-                return ret;
+            if (currentMethod.equals(method.getName())) {
+                return this.executeLimit(jPoint, targeClazz, method);
             }
         }
-        return ret;
+        return null;
     }
 
-    private void executeLimit(ProceedingJoinPoint jPoint, Class targeClazz) {
+    private Object executeLimit(ProceedingJoinPoint jPoint, Class targeClazz, Method method) {
 
+        boolean hasServiceLocalLimit = targeClazz.isAnnotationPresent(LocalLimit.class);
+        boolean hasMethodLocalLimit = method.isAnnotationPresent(LocalLimit.class);
+        if (!hasServiceLocalLimit && !hasMethodLocalLimit) {
+            try {
+                return jPoint.proceed();
+            } catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        }
         String className = targeClazz.getName();
-        RateLimiter limiter = LocalLimitConfigContainer.getRateLimiter(className);
-        Semaphore semaphore = LocalLimitConfigContainer.getSemaphore(className);
+        String methodName = method.getName();
+        String containerKey = hasServiceLocalLimit && !hasMethodLocalLimit ? className : className + methodName;
+        RateLimiter limiter = LocalLimitConfigContainer.getRateLimiter(containerKey);
+        Semaphore semaphore = LocalLimitConfigContainer.getSemaphore(containerKey);
         limiter.acquire();
         try {
             semaphore.acquire();
-            jPoint.proceed();
+            return jPoint.proceed();
         } catch (Throwable throwable) {
             logger.info("local_limit_error:class_name:{},ex:{}", className, throwable.getMessage());
             semaphore.release();
@@ -70,8 +71,15 @@ public class LocalLimitAop {
         } finally {
             semaphore.release();
         }
+        return null;
     }
 
+    /**
+     * 切入点可以添加其他路径
+     */
+    @Pointcut(EXECUTION)
+    private void pointCutMethod() {
+    }
 
 
 }
