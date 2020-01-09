@@ -130,6 +130,7 @@
                     <include>asyncThreadPool.properties</include>
                     <!--spi support-->
                     <include>META-INF/services/*</include>
+                    <include>META-INF/*</include>
                 </includes>
                 <excludes>
                     <exclude>ospMsg.properties</exclude>
