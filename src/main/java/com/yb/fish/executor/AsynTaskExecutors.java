@@ -23,8 +23,9 @@ public class AsynTaskExecutors {
     public static final String MAXIMUM_POOL_SIZE = "maximumPoolSize";
     public static final String KEEP_ALIVE_TIME = "keepAliveTime";
     public static final String WORK_QUEUE_SIZE = "workQueueSize";
+    public static ThreadPoolExecutor threadPoolExecutor = null;
 
-    private static final Logger logger = LoggerFactory.getLogger(FishContants.ASYNC_THREAD_POOL);
+    private static final Logger logger = LoggerFactory.getLogger(AsynTaskExecutors.class);
     private AsynTaskExecutors() {
     }
     static Properties setting = null;
@@ -35,6 +36,11 @@ public class AsynTaskExecutors {
         } catch (IOException e) {
             logger.info("AsynTaskExecutors IOException={}",e);
         }
+        int corePoolSize = Integer.parseInt(setting.getProperty(CORE_POOL_SIZE));
+        int maximumPoolSize = Integer.parseInt(setting.getProperty(MAXIMUM_POOL_SIZE));
+        long keepAliveTime = Long.parseLong(setting.getProperty(KEEP_ALIVE_TIME));
+        int workQueueSize = Integer.parseInt(setting.getProperty(WORK_QUEUE_SIZE));
+        threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(workQueueSize), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -42,13 +48,14 @@ public class AsynTaskExecutors {
      * @return ThreadPoolExecutor
      */
     public static ThreadPoolExecutor getExecutors(){
-
-        int corePoolSize = Integer.parseInt(setting.getProperty(CORE_POOL_SIZE));
-        int maximumPoolSize = Integer.parseInt(setting.getProperty(MAXIMUM_POOL_SIZE));
-        long keepAliveTime = Long.parseLong(setting.getProperty(KEEP_ALIVE_TIME));
-        int workQueueSize = Integer.parseInt(setting.getProperty(WORK_QUEUE_SIZE));
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(workQueueSize), new ThreadPoolExecutor.CallerRunsPolicy());
         return threadPoolExecutor;
     }
 
+    public static void main(String[] args){
+        ThreadPoolExecutor threadPoolExecutor1 = AsynTaskExecutors.getExecutors();
+        ThreadPoolExecutor threadPoolExecutor2 = AsynTaskExecutors.getExecutors();
+        System.out.println(threadPoolExecutor1);
+        System.out.println(threadPoolExecutor2);
+
+    }
 }
