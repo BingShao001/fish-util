@@ -77,4 +77,12 @@ public class BusinessException extends RuntimeException {
         this.bussinessErrorGroup = bussinessErrorGroup;
     }
 
+    @Override
+    public String toString() {
+        return "BusinessException{" +
+                "errorCode=" + errorCode +
+                ", message='" + message + '\'' +
+                ", bussinessErrorGroup='" + bussinessErrorGroup + '\'' +
+                '}';
+    }
 }
