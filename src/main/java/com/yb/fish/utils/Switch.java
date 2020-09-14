@@ -25,13 +25,4 @@ public class Switch {
         System.out.println(hashValue);
         return requestExecutePercent >= hashValue;
     }
-
-    public static void main(String[] args){
-        Switch aSwitch = new Switch();
-        aSwitch.hashControlPercent("zhangbing",10);
-        aSwitch.hashControlPercent("shanglijie",10);
-        aSwitch.hashControlPercent("55555555555",10);
-
-    }
-
 }
