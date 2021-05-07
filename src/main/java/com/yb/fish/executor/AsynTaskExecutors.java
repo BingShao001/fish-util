@@ -41,6 +41,7 @@ public class AsynTaskExecutors {
         long keepAliveTime = Long.parseLong(setting.getProperty(KEEP_ALIVE_TIME));
         int workQueueSize = Integer.parseInt(setting.getProperty(WORK_QUEUE_SIZE));
         threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(workQueueSize), new ThreadPoolExecutor.CallerRunsPolicy());
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {threadPoolExecutor.shutdown();}));
     }
 
     /**
