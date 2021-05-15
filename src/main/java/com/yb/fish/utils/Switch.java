@@ -21,7 +21,7 @@ public class Switch {
     }
 
     public boolean hashControlPercent(String key, int requestExecutePercent) {
-        int hashValue = Math.abs(key.hashCode()) % 100;
+        int hashValue = (key.hashCode() & 0x7FFFFFFF) % 100;
         System.out.println(hashValue);
         return requestExecutePercent >= hashValue;
     }
