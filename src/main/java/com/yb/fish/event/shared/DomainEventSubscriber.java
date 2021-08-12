@@ -1,4 +1,4 @@
-package com.yb.fish.event.origin;
+package com.yb.fish.event.shared;
 /**
 * DomainEventSubscriber订阅器
 * @author bing

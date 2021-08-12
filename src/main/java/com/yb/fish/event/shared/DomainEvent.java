@@ -1,4 +1,4 @@
-package com.yb.fish.event.origin;
+package com.yb.fish.event.shared;
 
 import java.io.Serializable;
 import java.util.Date;

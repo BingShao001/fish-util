@@ -1,4 +1,4 @@
-package com.yb.fish.event.origin;
+package com.yb.fish.event.shared;
 
 
 import java.util.ArrayList;
@@ -6,11 +6,12 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
-* 领域事件发布器
-* @author bing
-* @create 10/08/2021
-* @version 1.0
-**/
+ * 领域事件发布器
+ *
+ * @author bing
+ * @version 1.0
+ * @create 10/08/2021
+ **/
 public class DomainEventPublisher {
     private static ConcurrentHashMap<Class<? extends DomainEvent>, List<DomainEventSubscriber<? extends DomainEvent>>> subscriberMap
             = new ConcurrentHashMap<>();
