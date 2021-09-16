@@ -2,7 +2,6 @@ package com.yb.fish.dozer;
 
 import com.github.dozermapper.core.DozerBeanMapperBuilder;
 import com.github.dozermapper.core.Mapper;
-import com.yb.fish.bing.BingBean;
 import com.yb.fish.lombok.LombokBean;
 
 import java.nio.charset.StandardCharsets;

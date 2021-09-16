@@ -1,4 +1,4 @@
-package com.yb.fish.bing;
+package com.yb.fish.dozer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
