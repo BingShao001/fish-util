@@ -25,37 +25,55 @@ public class AsynTaskExecutors {
     public static ThreadPoolExecutor threadPoolExecutor = null;
 
     private static final Logger logger = LoggerFactory.getLogger(AsynTaskExecutors.class);
+
     private AsynTaskExecutors() {
     }
+
     static Properties setting = null;
+
     static {
-        setting  = new Properties();
+        setting = new Properties();
         try {
             setting.load(AsynTaskExecutors.class.getClassLoader().getResourceAsStream(ASYNC_THREAD_POOL_PROPERTIES));
         } catch (IOException e) {
-            logger.info("AsynTaskExecutors IOException={}",e);
+            logger.info("AsynTaskExecutors IOException={}", e);
         }
         int corePoolSize = Integer.parseInt(setting.getProperty(CORE_POOL_SIZE));
         int maximumPoolSize = Integer.parseInt(setting.getProperty(MAXIMUM_POOL_SIZE));
         long keepAliveTime = Long.parseLong(setting.getProperty(KEEP_ALIVE_TIME));
         int workQueueSize = Integer.parseInt(setting.getProperty(WORK_QUEUE_SIZE));
         threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS, new ArrayBlockingQueue<Runnable>(workQueueSize), new ThreadPoolExecutor.CallerRunsPolicy());
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {threadPoolExecutor.shutdown();}));
+        close(threadPoolExecutor);
+    }
+
+    private static void close(ThreadPoolExecutor threadPoolExecutor) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            threadPoolExecutor.shutdown();
+            try {
+                if (!threadPoolExecutor.awaitTermination(10, TimeUnit.SECONDS)) {
+                    threadPoolExecutor.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }));
     }
 
     /**
      * 有边界连接池对象
+     *
      * @return ThreadPoolExecutor
      */
-    public static ThreadPoolExecutor getExecutors(){
+    public static ThreadPoolExecutor getExecutors() {
         return threadPoolExecutor;
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         ThreadPoolExecutor threadPoolExecutor1 = AsynTaskExecutors.getExecutors();
         ThreadPoolExecutor threadPoolExecutor2 = AsynTaskExecutors.getExecutors();
         System.out.println(threadPoolExecutor1);
         System.out.println(threadPoolExecutor2);
 
     }
+
 }
