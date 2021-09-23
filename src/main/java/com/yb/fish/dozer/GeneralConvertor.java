@@ -86,7 +86,7 @@ public class GeneralConvertor {
     }
 
     public static void main(String[] args) {
-        BingBean bingBean = BingBean.builder().classType("int").className("Bing").data("xxx".getBytes(StandardCharsets.UTF_8)).build();
+        BingBean bingBean = BingBean.builder().classTypeAlias("int").count(3).className("Bing").data("xxx".getBytes(StandardCharsets.UTF_8)).build();
         LombokBean lombokBean = convertor(bingBean, LombokBean.class);
         System.out.println(lombokBean.toString());
 

@@ -1,5 +1,6 @@
 package com.yb.fish.dozer;
 
+import com.github.dozermapper.core.Mapping;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,6 +12,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BingBean {
     private String className;
-    private String classType;
+    @Mapping("classType")
+    private String classTypeAlias;
+    private Integer count;
     private byte[] data;
 }

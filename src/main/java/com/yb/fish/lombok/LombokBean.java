@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class LombokBean {
     private String className;
     private String classType;
+    private String count;
     private byte[] data;
 }
