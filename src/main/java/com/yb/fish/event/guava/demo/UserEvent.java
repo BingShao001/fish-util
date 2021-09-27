@@ -1,7 +1,9 @@
 package com.yb.fish.event.guava.demo;
 
 import com.yb.fish.event.guava.DomainEvent;
+import lombok.Data;
 
+@Data
 public class UserEvent extends DomainEvent {
     private String name;
     private int age;
