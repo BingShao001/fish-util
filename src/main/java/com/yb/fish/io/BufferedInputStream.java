@@ -6,7 +6,7 @@ public class BufferedInputStream extends InputStream{
         this.inputStream = inputStream;
     }
     public void read(){
-        System.out.println("BufferedInputStream read");
         inputStream.read();
+        System.out.println("BufferedInputStream read");
     }
 }
