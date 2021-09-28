@@ -17,7 +17,7 @@ public abstract class BaseHandler {
         if (condition()) {
             handle();
         }
-        if (null == nextHandler){
+        if (null != nextHandler){
             nextHandler.doHandle();
         }
     }

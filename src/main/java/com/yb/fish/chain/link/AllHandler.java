@@ -1,7 +1,7 @@
 package com.yb.fish.chain.link;
 
 
-public class YueHandler extends BaseHandler {
+public class AllHandler extends BaseHandler {
     @Override
     protected boolean condition() {
         return true;
@@ -9,6 +9,6 @@ public class YueHandler extends BaseHandler {
 
     @Override
     protected void handle() {
-        System.out.println("yue handle do");
+        System.out.println("all handle do");
     }
 }

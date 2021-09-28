@@ -7,11 +7,12 @@ public class HandlerChain {
     public void addHandler(BaseHandler baseHandler){
         if (null == header){
             header = baseHandler;
-            header.setNextHandler(tail);
+            header.setNextHandler(null);
+            tail = baseHandler;
             return;
         }
-        header.setNextHandler(baseHandler);
-        baseHandler.setNextHandler(tail);
+        tail.setNextHandler(baseHandler);
+        tail = baseHandler;
     }
 
     public void handle(){

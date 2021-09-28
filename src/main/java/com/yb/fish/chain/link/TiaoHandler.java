@@ -1,6 +1,5 @@
 package com.yb.fish.chain.link;
 
-import com.yb.fish.chain.list.BaseHandler;
 
 public class TiaoHandler extends BaseHandler {
     @Override

@@ -1,9 +1,6 @@
 package com.yb.fish.chain.link;
 
-import com.yb.fish.chain.list.BingHandler;
-import com.yb.fish.chain.list.HandlerChain;
-import com.yb.fish.chain.list.TiaoHandler;
-import com.yb.fish.chain.list.YueHandler;
+
 
 public class Main {
 
@@ -11,10 +8,12 @@ public class Main {
         BingHandler bingHandler = new BingHandler();
         YueHandler yueHandler = new YueHandler();
         TiaoHandler tiaoHandler = new TiaoHandler();
+        AllHandler allHandler = new AllHandler();
         HandlerChain handlerChain = new HandlerChain();
         handlerChain.addHandler(bingHandler);
         handlerChain.addHandler(yueHandler);
         handlerChain.addHandler(tiaoHandler);
+        handlerChain.addHandler(allHandler);
         handlerChain.handle();
 
     }
