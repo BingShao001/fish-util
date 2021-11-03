@@ -2,7 +2,7 @@ package com.yb.fish.io;
 /**
 * 相当于默认的，最基础的实现
 * @author bing
-* @create 28/09/2021
+* @create 19/10/2021
 * @version 1.0
 **/
 public class FileInputStream extends InputStream {
