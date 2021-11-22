@@ -54,6 +54,16 @@
             <version>${spring.beans}</version>
         </dependency>
         <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <version>${spring.beans}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+            <version>${spring.beans}</version>
+        </dependency>
+        <dependency>
             <groupId>org.eweb4j</groupId>
             <artifactId>fel</artifactId>
             <version>${computer.fel}</version>
@@ -72,11 +82,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>4.1.1.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
