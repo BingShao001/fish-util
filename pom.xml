@@ -14,9 +14,9 @@
         <java.encoding>UTF-8</java.encoding>
         <java.doc>2.9.1</java.doc>
         <!--<osp.basic>2.7.2</osp.basic>-->
-        <spring.core>4.0.5.RELEASE</spring.core>
+        <spring.core>5.3.18</spring.core>
         <computer.fel>0.8</computer.fel>
-        <spring.beans>5.1.6.RELEASE</spring.beans>
+        <spring.beans>5.3.18</spring.beans>
         <github.global.server>github</github.global.server>
     </properties>
 
