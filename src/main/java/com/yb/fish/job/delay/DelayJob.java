@@ -1,4 +1,4 @@
-package com.yb.fish.job;
+package com.yb.fish.job.delay;
 
 import org.apache.commons.lang3.StringUtils;
 

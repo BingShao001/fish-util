@@ -1,4 +1,4 @@
-package com.yb.fish.job;
+package com.yb.fish.job.delay;
 
 public interface IBizJob {
 
