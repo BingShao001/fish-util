@@ -71,6 +71,7 @@ public class BeanLifeCycle implements BeanNameAware, BeanFactoryAware, Applicati
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
         //在每个bean被初始化装进bean池后，可以在后置处理器中把他们加到监听器中做特殊处理
+        //aop实现流程生成代理对象对实现增强
         System.out.println("9.每个bean初始化的流程结束后执行: " + beanName);
         boolean equalsName = "lombokBean".equals(beanName);
         boolean isType = bean instanceof LombokBean;
