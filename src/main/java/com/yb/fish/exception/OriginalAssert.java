@@ -2,6 +2,7 @@ package com.yb.fish.exception;
 
 import com.alibaba.fastjson.JSON;
 import com.yb.fish.constant.FishContants;
+import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.util.Assert;
@@ -90,6 +91,20 @@ public class OriginalAssert extends Assert {
     public static void isEmpty(Collection<?> collection,String ospMsg) throws BusinessException {
         OspMsgModel ospMsgModel =  getOspMsgModel(ospMsg);
         if (CollectionUtils.isEmpty(collection)) {
+            throwBusinessException(ospMsgModel);
+        }
+    }
+
+    /**
+     * 当出入的集合判断为null时抛出异常符合中国人思维
+     *
+     * @param map 集合框架
+     * @param msg 提示properties对应的key
+     * @throws BusinessException 提示异常标识
+     */
+    public static void isEmpty(Map map, String msg) throws BusinessException {
+        OspMsgModel ospMsgModel =  getOspMsgModel(msg);
+        if (CollectionUtils.isEmpty(map)) {
             throwBusinessException(ospMsgModel);
         }
     }
