@@ -1,4 +1,4 @@
-package com.bing.component;
+package com.yb.fish.springbean.spi;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

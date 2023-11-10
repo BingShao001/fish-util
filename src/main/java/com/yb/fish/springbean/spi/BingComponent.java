@@ -1,4 +1,4 @@
-package com.bing.component;
+package com.yb.fish.springbean.spi;
 
 import lombok.Data;
 import org.springframework.beans.factory.InitializingBean;
