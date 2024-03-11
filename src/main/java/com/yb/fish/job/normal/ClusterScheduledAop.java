@@ -1,6 +1,7 @@
 package com.yb.fish.job.normal;
 
 
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -52,7 +53,8 @@ public class ClusterScheduledAop {
             return;
         }
         ClusterScheduled clusterScheduled = method.getAnnotation(ClusterScheduled.class);
-        String lockKey = clusterScheduled.lockKey();
+        String lockKeyValue = clusterScheduled.lockKey();
+        String lockKey = StringUtils.isBlank(lockKeyValue) ? jPoint.getTarget().getClass().getSimpleName() : lockKeyValue;
         if (!storeKey(lockKey)) {
             return;
         }
