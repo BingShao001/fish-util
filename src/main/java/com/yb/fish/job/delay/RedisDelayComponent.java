@@ -12,21 +12,21 @@ public class RedisDelayComponent {
 
     public static final int FAIL = 0;
 
-    private RedisTemplate<String,String> lokiClient;
+    private RedisTemplate<String,String> redisTemplate;
 
-    public RedisDelayComponent(RedisTemplate lokiClient) {
-        this.lokiClient = lokiClient;
+    public RedisDelayComponent(RedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
     public boolean addJob(DelayJob delayJob) {
-        return lokiClient.opsForValue().setIfAbsent(delayJob.getJobId(), delayJob.getData()) &&
-                lokiClient.opsForZSet().add(delayJob.getBizId(), delayJob.getJobId(), delayJob.getDelayTime());
+        return redisTemplate.opsForValue().setIfAbsent(delayJob.getJobId(), delayJob.getData()) &&
+                redisTemplate.opsForZSet().add(delayJob.getBizCode(), delayJob.getJobId(), delayJob.getDelayTime());
     }
 
     public boolean delJob(String bizId,String jobId) {
-        lokiClient.opsForZSet().remove(jobId);
-        lokiClient.delete(jobId);
-        return !Long.valueOf(FAIL).equals(lokiClient.opsForZSet().remove(bizId, jobId)) && lokiClient.delete(jobId);
+        redisTemplate.opsForZSet().remove(jobId);
+        redisTemplate.delete(jobId);
+        return !Long.valueOf(FAIL).equals(redisTemplate.opsForZSet().remove(bizId, jobId)) && redisTemplate.delete(jobId);
 
     }
 
@@ -38,8 +38,8 @@ public class RedisDelayComponent {
     public void consumer(String bizId, IBizJob bizJob) {
         long start = 0L;
         long now = System.currentTimeMillis();
-        ValueOperations<String, String> valueOperations = lokiClient.opsForValue();
-        Set<String> jobIds = lokiClient.opsForZSet().rangeByScore(bizId, start, now);
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        Set<String> jobIds = redisTemplate.opsForZSet().rangeByScore(bizId, start, now);
         if (CollectionUtils.isEmpty(jobIds)) {
             return;
         }
@@ -48,10 +48,10 @@ public class RedisDelayComponent {
             if (StringUtils.isBlank(data)) {
                 continue;
             }
-            lokiClient.delete(jobId);
+            redisTemplate.delete(jobId);
             bizJob.execute(data);
         }
-        lokiClient.opsForZSet().removeRange(bizId, start, now);
+        redisTemplate.opsForZSet().removeRange(bizId, start, now);
     }
 
 }

@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 * @create 19/11/2021
 * @version 1.0
 **/
-@Target( {ElementType.TYPE, ElementType.METHOD})
+@Target( {ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Scheduled
@@ -26,5 +26,5 @@ public @interface ClusterScheduled {
     @AliasFor(annotation = Scheduled.class, attribute = "cron")
     String cron() default "";
 
-    String lockKey() default "lock_key";
+    String lockKey() default "";
 }

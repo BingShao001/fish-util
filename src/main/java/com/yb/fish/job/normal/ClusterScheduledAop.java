@@ -54,7 +54,7 @@ public class ClusterScheduledAop {
         }
         ClusterScheduled clusterScheduled = method.getAnnotation(ClusterScheduled.class);
         String lockKeyValue = clusterScheduled.lockKey();
-        String lockKey = StringUtils.isBlank(lockKeyValue) ? jPoint.getTarget().getClass().getSimpleName() : lockKeyValue;
+        String lockKey = StringUtils.isBlank(lockKeyValue) ? jPoint.getTarget().getClass().getName() : lockKeyValue;
         if (!storeKey(lockKey)) {
             return;
         }

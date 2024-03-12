@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.bing.component.ComponentConfiguration
+com.bing.component.ComponentConfiguration,\
+  com.yb.fish.job.config.JobConfiguration

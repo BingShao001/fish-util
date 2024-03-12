@@ -4,19 +4,23 @@ import org.apache.commons.lang3.StringUtils;
 
 public class DelayJob {
     /**
+     * 区分业务维度
+     * eg: close_order
+     */
+    private String bizCode;
+    /**
      * 区分job维度
+     * eg: orderId
      */
     private String jobId;
     /**
-     * 区分业务维度
-     */
-    private String bizId;
-    /**
      * 任务延时时间（系统时间+延时时间）
+     * eg: 超时关单的时间
      */
     private long delayTime;
     /**
      * 延时任务数据
+     * eg: 可以传json字符串数据，用于延时任务执行
      */
     private String data;
 
@@ -24,8 +28,8 @@ public class DelayJob {
         return jobId;
     }
 
-    public String getBizId() {
-        return bizId;
+    public String getBizCode() {
+        return bizCode;
     }
 
     public long getDelayTime() {
@@ -39,7 +43,7 @@ public class DelayJob {
 
     DelayJob(Builder builder) {
         this.jobId = builder.jobId;
-        this.bizId = builder.bizId;
+        this.bizCode = builder.bizCode;
         this.delayTime = builder.delayTime;
         this.data = builder.data;
     }
@@ -57,7 +61,7 @@ public class DelayJob {
         /**
          * 区分业务维度
          */
-        String bizId;
+        String bizCode;
         /**
          * 任务延时时间（系统时间+延时时间）
          */
@@ -72,8 +76,8 @@ public class DelayJob {
             return this;
         }
 
-        public Builder bizId(String bizId) {
-            this.bizId = bizId;
+        public Builder bizCode(String bizCode) {
+            this.bizCode = bizCode;
             return this;
         }
 
@@ -91,8 +95,8 @@ public class DelayJob {
             if (StringUtils.isBlank(jobId)) {
                 throw new RuntimeException("jobId is null");
             }
-            if (StringUtils.isBlank(bizId)) {
-                throw new RuntimeException("bizId is null");
+            if (StringUtils.isBlank(bizCode)) {
+                throw new RuntimeException("bizCode is null");
             }
             if (StringUtils.isBlank(data)) {
                 throw new RuntimeException("data is null");
