@@ -20,7 +20,8 @@ public class RedisDelayComponent {
 
     public boolean addJob(DelayJob delayJob) {
         return redisTemplate.opsForValue().setIfAbsent(delayJob.getJobId(), delayJob.getData()) &&
-                redisTemplate.opsForZSet().add(delayJob.getBizCode(), delayJob.getJobId(), delayJob.getDelayTime());
+                redisTemplate.opsForZSet().add(delayJob.getBizCode(), delayJob.getJobId(),
+                        System.currentTimeMillis() + delayJob.getDelayTime());
     }
 
     public boolean delJob(String bizId,String jobId) {
@@ -32,14 +33,14 @@ public class RedisDelayComponent {
 
     /**
      * 配合@ClusterScheduled
-     * @param bizId
+     * @param bizCode
      * @param bizJob
      */
-    public void consumer(String bizId, IBizJob bizJob) {
+    public void consumer(String bizCode, IBizJob bizJob) {
         long start = 0L;
         long now = System.currentTimeMillis();
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        Set<String> jobIds = redisTemplate.opsForZSet().rangeByScore(bizId, start, now);
+        Set<String> jobIds = redisTemplate.opsForZSet().rangeByScore(bizCode, start, now);
         if (CollectionUtils.isEmpty(jobIds)) {
             return;
         }
@@ -49,9 +50,10 @@ public class RedisDelayComponent {
                 continue;
             }
             redisTemplate.delete(jobId);
+            redisTemplate.opsForZSet().remove(bizCode, jobId);
             bizJob.execute(data);
         }
-        redisTemplate.opsForZSet().removeRange(bizId, start, now);
     }
 
 }
+

@@ -9,8 +9,7 @@ public class DelayJob {
      */
     private String bizCode;
     /**
-     * 区分job维度
-     * eg: orderId
+     * Job的唯一标识，全局唯一
      */
     private String jobId;
     /**
