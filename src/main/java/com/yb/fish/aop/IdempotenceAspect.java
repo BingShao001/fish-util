@@ -1,23 +1,26 @@
 package com.yb.fish.aop;
+
 import com.yb.fish.annotation.Idempotent;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-
 @Aspect
-@Component
 public class IdempotenceAspect {
+    Logger logger = LoggerFactory.getLogger(IdempotenceAspect.class);
 
-    @Autowired
-    private IdempotenceComponent idempotenceComponent;
+    private final IdempotenceComponent idempotenceComponent;
+
+    public IdempotenceAspect(IdempotenceComponent idempotenceComponent) {
+        this.idempotenceComponent = idempotenceComponent;
+    }
 
     @Around("@annotation(com.yb.fish.annotation.Idempotent)")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -27,12 +30,15 @@ public class IdempotenceAspect {
         long expireTime = idempotent.expireTime();
 
         // 生成 requestId，可以基于方法名和参数生成
-        String requestId = generateRequestId(joinPoint);
+        String requestId = "requestId".equals(idempotent.requestId()) ? generateRequestId(joinPoint) : idempotent.requestId();
 
         // 幂等性校验
         boolean canProceed = idempotenceComponent.tryProcess(requestId, expireTime);
         if (!canProceed) {
-            return "Request has already been processed";
+            String methodName = signature.getName();
+            String className = joinPoint.getTarget().getClass().getName();
+            logger.error("Request has already been processed. class: {} method: {} expireTime: {}", className, methodName, expireTime);
+            throw new RuntimeException("The current request is restricted.");
         }
 
         Object result;

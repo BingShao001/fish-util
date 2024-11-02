@@ -10,11 +10,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
-*  用来做集群环境定时任务去重，时间2s，注：不要用来做2s以内的定时任务执行
-* @author bing
-* @create 19/11/2021
-* @version 1.0
-**/
+ *  用来做集群环境定时任务去重，时间2s，注：不要用来做2s以内的定时任务执行
+ * @author bing
+ * @create 19/11/2021
+ * @version 1.0
+ **/
 @Target( {ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
@@ -24,7 +24,7 @@ public @interface ClusterScheduled {
      * 其他需要自己去扩展
      **/
     @AliasFor(annotation = Scheduled.class, attribute = "cron")
-    String cron() default "";
+    String cron() default "0/1 * * * * ?";
 
     String lockKey() default "";
 }
