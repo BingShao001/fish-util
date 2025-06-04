@@ -1,4 +1,4 @@
-package io.jagat.config.limit;
+package com.yb.fish.limit;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

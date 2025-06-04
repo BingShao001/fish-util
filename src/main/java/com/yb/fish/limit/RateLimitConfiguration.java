@@ -1,6 +1,5 @@
-package io.jagat.config.limit;
+package com.yb.fish.limit;
 
-import io.jagat.config.context.AppRequestContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;

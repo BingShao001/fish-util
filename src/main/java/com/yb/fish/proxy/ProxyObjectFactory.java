@@ -1,5 +1,7 @@
 package com.yb.fish.proxy;
 
+import com.yb.fish.builder.BaseBuilder;
+import com.yb.fish.builder.BingBuilder;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 
@@ -23,6 +25,16 @@ public class ProxyObjectFactory {
     }
 
     public static <T> T getJdkProxyObject(Class<T> targetClazz, InvocationHandler h) {
-        return (T) Proxy.newProxyInstance(targetClazz.getClassLoader(), new Class[]{targetClazz}, h);
+        return (T) Proxy.newProxyInstance(targetClazz.getClassLoader(), targetClazz.getInterfaces(), h);
+    }
+
+    public static void main(String[] args) {
+        BaseBuilder bingBuilder = new BingBuilder();
+        BaseBuilder proxyObject = getJdkProxyObject(bingBuilder.getClass(), (proxy, method, args1) -> {
+            System.out.println("proxy对象生成");
+            return method.invoke(bingBuilder, args1);
+        });
+        proxyObject.build();
+
     }
 }

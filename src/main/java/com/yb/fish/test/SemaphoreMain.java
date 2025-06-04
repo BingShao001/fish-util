@@ -21,20 +21,19 @@ public class SemaphoreMain {
             executorService.submit(new Runnable() {
                 @Override
                 public void run() {
-                    try {
-                        countDownLatch.await();
-                        runWork();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-
+                    countDownLatch.countDown();
+                    runWork();
                 }
 
             });
-            countDownLatch.countDown();
 
         }
+        try {
+            countDownLatch.await();
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
