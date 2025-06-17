@@ -1,6 +1,8 @@
 package com.yb.fish.aop;
 
+import com.alibaba.fastjson.JSON;
 import com.yb.fish.annotation.Idempotent;
+import com.yb.fish.annotation.IdempotentParam;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -9,9 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+
 @Aspect
 public class IdempotenceAspect {
     Logger logger = LoggerFactory.getLogger(IdempotenceAspect.class);
@@ -58,11 +62,21 @@ public class IdempotenceAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         String methodName = signature.getName();
         String className = joinPoint.getTarget().getClass().getName();  // 获取类名
+        Method method = signature.getMethod();
+        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         Object[] args = joinPoint.getArgs();
-        String argsString = Arrays.toString(args);
-
+        StringBuffer  argsStringBuffer = new StringBuffer();
+        for (int i = 0; i < parameterAnnotations.length; i++) {
+            for (Annotation annotation : parameterAnnotations[i]) {
+                if (annotation instanceof IdempotentParam) {
+                    Object annotatedArg = args[i];
+                    argsStringBuffer.append(JSON.toJSONString(annotatedArg));
+                    argsStringBuffer.append(":");
+                }
+            }
+        }
         // 将类名、方法名和参数拼接作为唯一标识
-        String key = className + ":" + methodName + ":" + argsString;
+        String key = className + ":" + methodName + ":" + argsStringBuffer.toString();
         return DigestUtils.md5DigestAsHex(key.getBytes(StandardCharsets.UTF_8));
     }
 }
