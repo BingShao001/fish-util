@@ -16,7 +16,7 @@
         <!--<osp.basic>2.7.2</osp.basic>-->
         <spring.core>4.0.5.RELEASE</spring.core>
         <computer.fel>0.8</computer.fel>
-        <spring.beans>5.1.6.RELEASE</spring.beans>
+        <spring.beans>5.2.20.RELEASE</spring.beans>
         <github.global.server>github</github.global.server>
     </properties>
 
